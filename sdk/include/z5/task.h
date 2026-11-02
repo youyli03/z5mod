@@ -85,6 +85,11 @@ int  z5_task_create(z5_task *t, const char name[8], u32 prio, void *handler_blob
  * blocking the firmware's message pump. */
 int  z5_task_create_raw(z5_task *t, const char name[8], u32 prio, void *entry);
 
+/* Same, but the entry is ARM code: its low bit must stay clear, because the
+ * kernel switches state with a plain bx. Use this for images made by
+ * z5_img_copy_arm*(), and create_raw() for Thumb images. */
+int  z5_task_create_arm(z5_task *t, const char name[8], u32 prio, void *entry);
+
 /* Explicit start (needed after a task was created raw/dormant, or restarted
  * after it exited). Returns tk_sta_tsk's ER: 0 = running. */
 int  z5_task_start(z5_task *t);

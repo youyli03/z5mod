@@ -84,7 +84,7 @@ int z5_task_post(z5_task *t, void *payload)
 /* Raw create: no queue/mailbox, our entry becomes obj+4 (the field the kernel
  * trampoline 0x10232859 jumps through). Verified on hardware in Round 502 -
  * the body runs and keeps running in its own task context. */
-int z5_task_create_raw(z5_task *t, const char name[8], u32 prio, void *entry)
+static int raw_create(z5_task *t, const char name[8], u32 prio, void *entry, int thumb)
 {
     if (!t) return -1;
     u8 *obj  = (u8 *)z5_alloc(0x100, 0);
@@ -101,7 +101,11 @@ int z5_task_create_raw(z5_task *t, const char name[8], u32 prio, void *entry)
     for (u32 i = 0; i < 8; i++) args[0x10 + i] = (u8)name[i];
 
     u32 e = (u32)entry;
-    if (!(e & 1u)) e |= 1u;                 /* Thumb */
+    if (thumb) {
+        if (!(e & 1u)) e |= 1u;             /* Thumb: the kernel bx's this */
+    } else {
+        e &= ~1u;                           /* ARM: a clear low bit switches state */
+    }
     *(u32 *)(obj + Z5_TCB_MSGSIZE) = 0x1FFu;
 
     int rc = Z5_TASK_CREATE(obj, e, (void *)args);
@@ -116,4 +120,14 @@ int z5_task_create_raw(z5_task *t, const char name[8], u32 prio, void *entry)
     }
     z5_free(args);
     return rc;
+}
+
+int z5_task_create_raw(z5_task *t, const char name[8], u32 prio, void *entry)
+{
+    return raw_create(t, name, prio, entry, 1);
+}
+
+int z5_task_create_arm(z5_task *t, const char name[8], u32 prio, void *entry)
+{
+    return raw_create(t, name, prio, entry, 0);
 }
