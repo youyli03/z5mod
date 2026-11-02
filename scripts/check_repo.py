@@ -46,6 +46,12 @@ def main() -> int:
         if (".git" in rel.parts or "__pycache__" in rel.parts
                 or "build" in rel.parts or "dist" in rel.parts):
             continue
+        # The one exception: a reproducible, camera-tested example module,
+        # named the way the loader looks for it on the card.
+        if (path.name == "Z5APP.BIN"
+                and rel.parts[:2] == ("sdk", "examples")
+                and "prebuilt" in rel.parts):
+            continue
         if path.suffix.lower() in FORBIDDEN_EXT:
             problems.append("%s: forbidden file type" % rel)
             continue

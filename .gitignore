@@ -17,4 +17,4 @@ __pycache__/
 # without a toolchain. Each one must be listed in sdk/examples/prebuilt.json
 # together with the hash of the build that produced it.
 *.Z5M
-!sdk/examples/*/prebuilt/*.Z5M
+!sdk/examples/*/prebuilt/Z5APP.BIN

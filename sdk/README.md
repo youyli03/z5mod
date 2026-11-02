@@ -3,9 +3,13 @@
 Build `.Z5M` modules that the patched camera loads from the card.
 
 ```sh
-python sdk/examples/hello/build.py          # -> sdk/build/hello.Z5M
-python sdk/tools/z5pack.py check sdk/build/hello.Z5M
+python sdk/examples/hello/build.py                     # -> examples/hello/build/Z5APP.BIN
+python sdk/tools/z5pack.py check sdk/examples/hello/build/Z5APP.BIN
 ```
+
+The output is named the file the loader opens on the card: copy
+`examples/hello/build/Z5APP.BIN` to the card root and the patched firmware runs it
+on the next redraw.
 
 Requires `arm-none-eabi-gcc` and binutils on `PATH`. The image checker also
 wants `capstone` (`python -m pip install capstone`) and is optional.
@@ -17,7 +21,8 @@ include/z5/   one header per area, that is the whole public API
 src/          one source per area (an area may add one *_arm.c)
 z5mod.ld      linked at 0; position independence comes from r9
 tools/        z5build.py (compile+link+pack), z5pack.py, imgcheck.py
-examples/     one directory per example, each with its own build.py
+examples/     one directory per example: main.c, build.py, and prebuilt/ once
+              the example has been run on a camera
 ```
 
 | Header | Contents |
@@ -57,3 +62,10 @@ users stays the same.
 * code copied into the heap (`Z5_IMAGE`) may not touch r9, call other module
   functions, or use string literals - `tools/imgcheck.py` enforces this;
 * the menu waits for the callback to return, so return quickly.
+
+## Prebuilt modules
+
+An example that has been tested on a camera ships its tested module as
+`examples/<name>/prebuilt/Z5APP.BIN`. That one file is the only module tracked in
+git; everything else under `build/` is a build product. Rebuilding the example
+must reproduce it byte for byte - the commit that added it records the hash.

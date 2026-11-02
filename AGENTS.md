@@ -32,16 +32,16 @@ Tracked files must never contain:
 An example may ship a prebuilt module so a user without a toolchain can try it.
 Such a file is only accepted when all of the following hold:
 
-* it lives at `sdk/examples/<example>/prebuilt/<name>.Z5M` - nowhere else;
-* it is **reproducible**: rebuilding the same sources produces a byte-identical
-  file, and the hash of the build is recorded in `sdk/examples/prebuilt.json`
-  next to the file name;
-* that manifest entry also names the sources it was built from;
+* it lives at `sdk/examples/<example>/prebuilt/Z5APP.BIN` - nowhere else,
+  because that is the name the loader opens on the card;
+* it is **reproducible**: rebuilding that example from this repository produces
+  a byte-identical file, and the commit that adds it states the hash;
 * it contains nothing but our own code and (optionally) an audio asset that we
   own or generated - never third-party audio, never firmware.
 
-Anything that cannot be reproduced from this repository stays out of git and, if
-needed, is attached to a release instead.
+A module is not firmware: it needs no version manifest. The hash lives in the
+commit message and in the example readme, which is enough to check a rebuild.
+Anything that cannot be reproduced from this repository stays out of git.
 
 ## 3. No absolute or machine-specific paths
 
