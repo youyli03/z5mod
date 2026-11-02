@@ -1,0 +1,19 @@
+#!/bin/sh
+# Repository hygiene gate. Installed with:
+#     git config core.hooksPath .githooks
+#
+# Git never installs hooks automatically on clone (that would run arbitrary code
+# from the repository), so this one is opt-in and documented in scripts/README.md.
+#
+# It runs the same checker as CI would: ASCII only, no local paths, no firmware
+# or build artefacts, plus the prebuilt-module exception.
+
+PY=python3
+command -v python3 >/dev/null 2>&1 || PY=python
+
+if [ ! -f scripts/check_repo.py ]; then
+    echo "pre-commit: scripts/check_repo.py is missing" >&2
+    exit 1
+fi
+
+exec "$PY" scripts/check_repo.py
