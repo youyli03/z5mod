@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sys
 from pathlib import Path
 
 from . import container
+from .features import stage0
 from .platform import z5_150 as z5
 
 
@@ -39,6 +41,18 @@ def cmd_extract(args) -> int:
     raise SystemExit("%s is not in this package" % wanted)
 
 
+def cmd_build(args) -> int:
+    _, mods = container.load(Path(args.package))
+    main = container.main_module(mods)
+    patched = stage0.apply(main.data)
+    if args.out.exists():
+        raise SystemExit("%s exists; refusing to overwrite" % args.out)
+    args.out.write_bytes(patched)
+    print("wrote %s (%d bytes, sha256 %s)" % (args.out, len(patched),
+                                              hashlib.sha256(patched).hexdigest()))
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="z5mod-fw", description=__doc__)
     sub = ap.add_subparsers(dest="command", required=True)
@@ -46,6 +60,11 @@ def main(argv=None) -> int:
     p = sub.add_parser("verify", help="decode a stock package and check every checksum")
     p.add_argument("package", type=Path)
     p.set_defaults(func=cmd_verify)
+
+    p = sub.add_parser("build", help="apply the module host patch and write the result")
+    p.add_argument("package", type=Path)
+    p.add_argument("--out", type=Path, required=True)
+    p.set_defaults(func=cmd_build)
 
     p = sub.add_parser("extract", help="write one module out of the package")
     p.add_argument("package", type=Path)
