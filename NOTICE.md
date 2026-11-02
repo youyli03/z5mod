@@ -57,6 +57,9 @@ Build reports carry a `camera_verified` field. It is `false` unless the exact
 byte output was run on a camera. Please keep that field accurate in your own
 reports: a valid checksum says nothing about camera behaviour.
 
+The licence scope in [LICENSE](LICENSE) says this explicitly: the MIT grant covers
+the contributors' own code, not this table.
+
 ## Third-party media
 
 `resource/` holds three audio files used for testing. They were downloaded from
