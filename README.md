@@ -34,6 +34,17 @@ python sdk/examples/hello/build.py
 
 Requires Python 3.10+ for the patcher and `arm-none-eabi-gcc` for the SDK.
 
+## Examples
+
+| Example | What it does | Module |
+| --- | --- | --- |
+| **[shutter-sound](sdk/examples/shutter-sound/README.md)** | plays your own clip instead of the camera's shutter sound: full press fires it, a burst repeats it, half press stays silent | 2,604 B, `8dc0e200...` |
+| [hello](sdk/examples/hello/README.md) | the smallest complete module: one line of text on its row | 388 B, `1d7ebd5e...` |
+
+Start with [shutter-sound](sdk/examples/shutter-sound/README.md): it walks through
+the three pieces a real module needs - the shutter hook, the task that paces the
+audio engine, and a text buffer that survives the module image being freed.
+
 ## Using it on the camera
 
 1. **Card in slot 1.** The loader reads `A:\`, which is that slot.
