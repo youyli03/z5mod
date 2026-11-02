@@ -18,7 +18,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]   # scripts/ -> repo root
 
-ALLOWED_EXT = {".md", ".py", ".c", ".h", ".S", ".ld", ".json", ".toml", ".txt",
+ALLOWED_EXT = {".md", ".py", ".c", ".h", ".s", ".ld", ".json", ".toml", ".txt",
                ".dat", ".sh", ".hex", ""}
 FORBIDDEN_EXT = {".bin", ".z5m", ".dec", ".bi", ".exe", ".zip", ".gz"}
 
@@ -43,7 +43,8 @@ def main() -> int:
         if not path.is_file():
             continue
         rel = path.relative_to(ROOT)
-        if ".git" in rel.parts or "__pycache__" in rel.parts:
+        if (".git" in rel.parts or "__pycache__" in rel.parts
+                or "build" in rel.parts or "dist" in rel.parts):
             continue
         if path.suffix.lower() in FORBIDDEN_EXT:
             problems.append("%s: forbidden file type" % rel)
