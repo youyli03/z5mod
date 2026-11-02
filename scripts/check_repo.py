@@ -18,7 +18,8 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]   # scripts/ -> repo root
 
-ALLOWED_EXT = {".md", ".py", ".c", ".h", ".S", ".ld", ".json", ".toml", ".txt", ""}
+ALLOWED_EXT = {".md", ".py", ".c", ".h", ".S", ".ld", ".json", ".toml", ".txt",
+               ".dat", ".sh", ".hex", ""}
 FORBIDDEN_EXT = {".bin", ".z5m", ".dec", ".bi", ".exe", ".zip", ".gz"}
 
 _SLASH = chr(47)
@@ -27,11 +28,12 @@ LOCAL_PATTERNS = [
     _SLASH + "home" + _SLASH,
     _SLASH + "Users" + _SLASH,
     _SLASH + "tmp" + _SLASH,
-    "A:" + _BSLASH,
-    "C:" + _BSLASH,
     "stu" + "." + "m1saka",
     "tiny" + "claw",
 ]
+# Windows drive letters C: to Z:. A: and B: are left out on purpose: the camera's
+# memory card is A:, and paths like A:\\Z5APP.BIN are part of the subject matter.
+LOCAL_PATTERNS += [chr(letter) + ":" + _BSLASH for letter in range(ord("C"), ord("Z") + 1)]
 
 
 def main() -> int:
@@ -41,7 +43,7 @@ def main() -> int:
         if not path.is_file():
             continue
         rel = path.relative_to(ROOT)
-        if ".git" in rel.parts:
+        if ".git" in rel.parts or "__pycache__" in rel.parts:
             continue
         if path.suffix.lower() in FORBIDDEN_EXT:
             problems.append("%s: forbidden file type" % rel)

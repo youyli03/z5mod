@@ -12,7 +12,18 @@ are used here only to describe compatibility.
 This repository does not contain, and will not contain:
 
 * Nikon firmware images, in original or modified form;
-* firmware decryption keys or tables derived from Nikon firmware;
+* firmware decryption keys or tables derived from Nikon firmware, with one
+  exception described directly below.
+
+### The XOR mask
+
+`firmware/src/z5mod_fw/platform/z5_150_mask.hex` holds the 768-byte XOR mask
+that converts a stock package you already own into the layout the patcher
+reads. It is the only derived material here: it is not a firmware image and
+cannot reconstruct one on its own. It is present because a single stock
+package does not contain enough known-plaintext to re-derive it, unlike some
+other bodies. Without the file the patcher refuses to run; nothing else in
+this repository depends on it.
 * memory dumps, firmware extractions, or repackaged update files.
 
 You must obtain the stock firmware yourself from Nikon and comply with Nikon's
