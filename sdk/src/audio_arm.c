@@ -56,9 +56,9 @@ static inline s32 ctl_svc(u32 tfn, u32 a1, u32 a2)
     return (s32)r0;
 }
 
-#define CTL_FW_CP     0xC1811738u   /* control block          */
-#define CTL_FW_STATE  0xC18117C8u   /* play state block       */
-#define CTL_FW_LENMS  0xC1811768u   /* clip length in ms      */
+#define CTL_FW_STATE  0xC18117C8u   /* play state block        */
+#define CTL_CP        0x50u         /* state + 0x50: control block      */
+#define CTL_MS        0x54u         /* state + 0x54: clip length in ms  */
 #define CTL_TICK      0xC18EB388u   /* firmware ms clock      */
 #define CTL_REQ       0x48u         /* state+0x48: play request */
 #define CTL_MSGS      0x2Cu         /* state+0x2C: messages   */
@@ -82,8 +82,8 @@ void z5_ctl_main(void *arg)
 {
     (void)arg;
     for (;;) {
-        u32 cp = *(volatile u32 *)CTL_FW_CP;
         u32 s  = *(volatile u32 *)CTL_FW_STATE;
+        u32 cp = RAM_OK(s) ? *(volatile u32 *)(s + CTL_CP) : 0u;
 
         if (RAM_OK(cp) && RAM_OK(s)) {
             u32 now  = *(volatile u32 *)CTL_TICK;
@@ -115,7 +115,7 @@ void z5_ctl_main(void *arg)
                     } else {
                         mode = 2u;
                         step = 0u;
-                        dl = now + *(volatile u32 *)CTL_FW_LENMS;
+                        dl = now + *(volatile u32 *)(s + CTL_MS);
                     }
                 }
             } else if (mode == 2u) {
