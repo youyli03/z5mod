@@ -18,7 +18,7 @@ SECTIONS
         KEEP(*(.text.z5_entry))
         *(.text*)
         . = ALIGN(4);
-        KEEP(*(.z5img*))
+        *(.z5img*)
         . = ALIGN(4);
         *(.rodata*)
     }

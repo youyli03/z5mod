@@ -24,11 +24,13 @@ firmware runs it on the next redraw.
 `prebuilt/Z5APP.BIN` is the module that was run on the camera:
 
 ```
-sha256 83cd80571908e2bdfa7bb35f48a98bb57d27bbbdc51091a024248b12b829bcc5
-size   2928 bytes
+sha256 1d7ebd5e71713261080ee29bce8e388b46ae6269190aab5a176879e695d3e6ae
+size   388 bytes
 ```
 
-Rebuilding the sources must reproduce exactly those bytes.
+Rebuilding the sources must reproduce exactly those bytes. The module is small
+because the linker keeps only the code this example calls: before that, every
+module carried the whole SDK.
 
 ## What it demonstrates
 

@@ -44,6 +44,9 @@ CFLAGS = [
     # keep Z5_IMAGE() functions in source order, so a Z5_IMAGE_END marker
     # always lands after the code it closes
     '-fno-toplevel-reorder', '-fno-reorder-functions',
+    # drop everything the example does not reference, so a module's bytes do
+    # not change when an unrelated area of the SDK grows
+    '-ffunction-sections', '-fdata-sections',
 ]
 
 ADDR_LOW, ADDR_HIGH = 0x10020000, 0x12200000
@@ -67,10 +70,12 @@ def flags_for(src: pathlib.Path) -> list:
 
 
 def build(main_c: pathlib.Path, out: pathlib.Path, keep: bool = False) -> None:
-    work = SDK / 'build'
-    work.mkdir(exist_ok=True)
     main_c = main_c.resolve()
     stem = main_c.stem
+    # Intermediates next to the output, not in a shared directory: two examples
+    # both have a main.c, and a shared work dir let them overwrite each other.
+    work = out.resolve().parent / 'obj'
+    work.mkdir(parents=True, exist_ok=True)
 
     sources = sorted(SRC.glob('*.S')) + sorted(SRC.glob('*.c')) + [main_c]
     objs = []
@@ -81,7 +86,7 @@ def build(main_c: pathlib.Path, out: pathlib.Path, keep: bool = False) -> None:
 
     elf = work / (stem + '.elf')
     run([CC] + CFLAGS + ['-T', str(LDScript), '-o', str(elf)] + objs
-        + ['-Wl,-Map=' + str(work / (stem + '.map'))])
+        + ['-Wl,--gc-sections', '-Wl,-Map=' + str(work / (stem + '.map'))])
 
     raw = work / (stem + '.bin')
     run([OBJCOPY, '-O', 'binary', str(elf), str(raw)])

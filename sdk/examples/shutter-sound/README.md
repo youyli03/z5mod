@@ -37,3 +37,14 @@ Output: `build/Z5APP.BIN`, copy it to the card root.
   know about the six-message sequence or its pacing;
 * the row prints messages posted and clip frames, so a silent run can be told
   apart from a run where nothing was posted.
+
+## Prebuilt
+
+`prebuilt/Z5APP.BIN` is the module that ran on the camera:
+
+```
+sha256 8dc0e2008122218c1acef02d82b0c6a1ef3e24a5e4d8015793ed62053e7bed7d
+size   2604 bytes
+```
+
+Rebuilding the sources must reproduce exactly those bytes.
