@@ -19,6 +19,10 @@
  * and is not used by the firmware (the working modules relied on it). */
 #define Z5_STATE_SLOT  0xC1811738u
 
+/* The first 32 bytes are reserved for the SDK: the bump offset and the slots
+ * the hook image has to reach at a fixed address. User data starts after them. */
+#define Z5_STATE_RESERVED 0x20u
+
 /* Total size of the block. Nothing is ever freed, so keep it modest. */
 #define Z5_STATE_SIZE  0x1000u
 

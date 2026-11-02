@@ -1,9 +1,10 @@
 /* z5mod - state that outlives one module load. */
 #include "z5/state.h"
 
-/* First eight bytes of the block hold the bump offset. */
+/* The first 32 bytes are reserved: the bump offset plus the fixed slots the
+ * hook image reads (see state.h and hook.c). */
 #define USED_OFFSET 0u
-#define DATA_START  8u
+#define DATA_START  Z5_STATE_RESERVED
 
 void *z5_state(void)
 {
