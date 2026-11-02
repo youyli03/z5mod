@@ -16,7 +16,9 @@ Usage:  imgcheck.py <module.elf> [-d]
 Exit code 1 on any violation.
 """
 import re
+import os
 import subprocess
+import tempfile
 import sys
 
 try:
@@ -43,6 +45,10 @@ def symbols(elf):
 
 
 def text_blob(elf, tmp=None):
+    """Copy .text out of the ELF and return (load address, bytes)."""
+    if tmp is None:
+        handle, tmp = tempfile.mkstemp(suffix='.bin', prefix='z5img-')
+        os.close(handle)
     out = subprocess.run([OBJDUMP, '-h', elf], capture_output=True, text=True).stdout
     addr = None
     for line in out.splitlines():
@@ -51,7 +57,11 @@ def text_blob(elf, tmp=None):
             addr = int(m.group(2), 16)
     subprocess.run([OBJCOPY, '-O', 'binary', '--only-section=.text', elf, tmp],
                    check=True, capture_output=True)
-    return addr, open(tmp, 'rb').read()
+    try:
+        return addr, open(tmp, 'rb').read()
+    finally:
+        if tmp and os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 def images(syms, base, blob):
