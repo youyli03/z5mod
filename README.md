@@ -85,6 +85,7 @@ unless they keep state in the firmware heap; see `docs/`.
 | `firmware/` | patcher that turns a stock firmware package into the module host build, plus its hash manifests (`firmware/known/`) |
 | `sdk/` | C SDK used to build the modules, with a tested example |
 | `docs/` | design notes, ABI notes, per-feature documentation |
+| `resource/` | **third-party** test audio, see `resource/README.md` |
 
 ## Status
 

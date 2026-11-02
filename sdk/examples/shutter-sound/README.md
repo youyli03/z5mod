@@ -21,6 +21,17 @@ python scripts/wav2z5.py clip.wav -o SND.WAV --seconds 0.9 --trim --normalize
 Copy it to the card root as `SND.WAV`. Without it the module shows a length of 0
 and stays silent.
 
+Two ready-made clips are in `resource/`, and they are byte-identical to what the
+tests used on the card:
+
+| Repository file | Card file | Length |
+| --- | --- | --- |
+| `resource/SND_MANBO.WAV` | `SND.WAV` | 0.69 s |
+| `resource/SND_CIALLO.WAV` | `SND.WAV` (earlier tests) | 0.92 s |
+
+Both are third-party audio - see `resource/README.md` - so use them for testing
+and put your own clip in place for anything else.
+
 ## Build
 
 ```sh

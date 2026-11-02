@@ -46,6 +46,9 @@ def main() -> int:
         if (".git" in rel.parts or "__pycache__" in rel.parts
                 or "build" in rel.parts or "dist" in rel.parts):
             continue
+        # Test media is binary on purpose; the NOTICE explains its status.
+        if rel.parts[:1] == ("resource",):
+            continue
         # The one exception: a reproducible, camera-tested example module,
         # named the way the loader looks for it on the card.
         if (path.name == "Z5APP.BIN"

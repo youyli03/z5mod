@@ -57,6 +57,13 @@ Build reports carry a `camera_verified` field. It is `false` unless the exact
 byte output was run on a camera. Please keep that field accurate in your own
 reports: a valid checksum says nothing about camera behaviour.
 
+## Third-party media
+
+`resource/` holds three audio files used for testing. They were downloaded from
+the internet, they are not covered by this project's licence, and they are not
+required: replace them with material you have the right to use. See
+`resource/README.md`.
+
 ## Third-party components
 
 * Keystone Engine (assembler used by some build steps) is GPLv2. It is a build

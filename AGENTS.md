@@ -39,6 +39,10 @@ Such a file is only accepted when all of the following hold:
 * it contains nothing but our own code and (optionally) an audio asset that we
   own or generated - never third-party audio, never firmware.
 
+Test media that is *not* ours may live in `resource/` only, and only with the
+status spelled out in `NOTICE.md`: third-party, unlicensed, replaceable. It is
+never built into a module and never shipped inside a prebuilt.
+
 A module is not firmware: it needs no version manifest. The hash lives in the
 commit message and in the example readme, which is enough to check a rebuild.
 Anything that cannot be reproduced from this repository stays out of git.
