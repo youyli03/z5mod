@@ -1,0 +1,20 @@
+# firmware and derived artefacts never belong in git
+*.bin
+*.BIN
+*.dec
+*.bi
+key.json
+sig.json
+output/
+build/
+dist/
+__pycache__/
+*.pyc
+.venv/
+
+# module images are build products, with one deliberate exception:
+# reproducible prebuilt modules shipped with an example so users can try it
+# without a toolchain. Each one must be listed in sdk/examples/prebuilt.json
+# together with the hash of the build that produced it.
+*.Z5M
+!sdk/examples/*/prebuilt/*.Z5M
