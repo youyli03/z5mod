@@ -88,9 +88,9 @@ def check(name, thumb_addr, code, thumb=True, dump=False):
     lo, hi = 0, len(code)
     errs = []
     lines = []
-    literals = set()          # addresses of ldr-literal words: real data, not code
+    literals = []             # [(start,end)] of ldr-literal words: real data, not code
     for ins in md.disasm(code, lo):
-        if ins.address in literals:
+        if any(a <= ins.address < b for a, b in literals):
             continue          # literal pool: decoding it as code gives false hits
         tag = ''
         ops = ins.op_str
@@ -103,14 +103,17 @@ def check(name, thumb_addr, code, thumb=True, dump=False):
         if re.search(r'\br9\b', ops) or re.search(r'\bsb\b', ops):
             tag = '  <-- touches the PIC base r9'
         if 'pc' in ops and ins.mnemonic.startswith('ldr'):
-            m = re.search(r'#(-?0x[0-9a-f]+)', ops)
+            # objdump prints small PC-relative offsets in decimal ("#188") and
+            # larger ones in hex ("#0x1b0"); accept both (R631 fix).
+            m = re.search(r'#(-?(?:0x[0-9a-fA-F]+|\d+))', ops)
             if m:
+                delta = int(m.group(1), 0)
                 if thumb:
-                    tgt = ((ins.address + 4) & ~3) + int(m.group(1), 16)
+                    tgt = ((ins.address + 4) & ~3) + delta
                 else:
-                    tgt = ((ins.address + 8) & ~3) + int(m.group(1), 16)
+                    tgt = ((ins.address + 8) & ~3) + delta
                 if lo <= tgt < hi:
-                    literals.add(tgt)
+                    literals.append((tgt, tgt + 4))
                 if not (lo <= tgt < hi):
                     tag = '  <-- literal 0x%X is outside the image' % tgt
         if tag:
