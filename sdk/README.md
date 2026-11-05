@@ -33,6 +33,7 @@ examples/     one directory per example: main.c, build.py, and prebuilt/ once
 | `str.h` | UTF-16 string building without libc |
 | `ui.h` | row text fields, `z5_row_set_text`, `z5_row_draw` |
 | `log.h` | RAM ring, whole-file log helpers, streaming log |
+| `bglog.h` | optional batch log (compile-time off by default) |
 | `task.h` | task create/start/post/find and the object layout |
 | `time.h` | `z5_time_ms`, `z5_delay_ms` |
 | `image.h` | `Z5_IMAGE` code images and the copy helpers |
@@ -51,6 +52,34 @@ examples/     one directory per example: main.c, build.py, and prebuilt/ once
 If an area ever needs more than three sources, its own data tables, or optional
 distribution, promote it to `sdk/<area>/{include,src}`; the include path for
 users stays the same.
+
+## Background log
+
+`bglog` is an optional batch log: a RAM ring, a `BE_REC`-backed flusher, and
+`A:\Z5LOG.BIN` batches with a page guard around FS requests. It is compiled only
+when `Z5_LOG_ENABLE` is 1; every area switch defaults to 0.
+
+```sh
+# logger + all area switches
+python sdk/examples/shutter-sound/build.py --log
+
+# only the selected switches (others compile out)
+python sdk/examples/shutter-sound/build.py --log=UI,HOOK
+
+# user code can add its own compile-time flag
+python sdk/examples/shutter-sound/build.py --log=UI --define Z5_LOG_MY_THING=1
+```
+
+```c
+#include "z5/bglog.h"
+
+Z5_LOG(Z5_LOG_UI, Z5_BGLOG_T_NODE, Z5_BGLOG_NODE_LOAD,
+       ctx->sequence, ctx->length);
+```
+
+`Z5_LOG(flag, ...)` disappears when `flag` is 0. Hook images use
+`Z5_BGLOG_PUT_HOOK(Z5_LOG_HOOK, ...)`, which only touches memory. The default
+build emits no `bglog` code and the stock `shutter-sound` output stays 2,604 B.
 
 ## What a module must respect
 

@@ -40,6 +40,24 @@ python sdk/examples/shutter-sound/build.py
 
 Output: `build/Z5APP.BIN`, copy it to the card root.
 
+## Background log
+
+The same source can build with the optional batch log:
+
+```sh
+python sdk/examples/shutter-sound/build.py --log
+python sdk/examples/shutter-sound/build.py --log=UI,HOOK
+```
+
+The first enables the logger and all area switches; the second compiles only the
+selected areas. The default build emits no log code and keeps the 2,604-byte
+prebuilt output.
+
+A logging build needs `A:\Z5LOG.BIN` on the card (a 32-byte placeholder or an
+existing log). It records the module load/draw, WAV/audio/hook setup, every
+shutter notification from the hook image, and the flusher/timer/FS nodes. The
+hook logs only memory; file I/O stays in the background flusher.
+
 ## What it shows
 
 * `z5_audio_init()` copies the clip into the four-times buffer the engine needs
