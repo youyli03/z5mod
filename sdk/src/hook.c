@@ -2,6 +2,7 @@
  * the first notification callback, chained, raising the audio request word.
  */
 #include "z5/hook.h"
+#include "z5/bglog.h"
 #include "z5/image.h"
 #include "z5/state.h"
 #include "z5/audio.h"
@@ -31,9 +32,16 @@ static u32 hook_cb1(u32 code, u32 a1, u32 a2, u32 a3)
     if (s >= 0xC1800000u && s < 0xC8700000u &&
         *(volatile u32 *)(s + 0x08u) == AUDIO_MAGIC) {
         orig = *(volatile u32 *)(s + ST_CB1_ORIG);
+        /* Every notification code, not just the full press. */
+        Z5_BGLOG_PUT_HOOK(Z5_LOG_HOOK, Z5_BGLOG_NODE_HOOK, code,
+                          *(volatile u32 *)(s + ST_EDGES));
         if (code == CODE_FULL_PRESS) {
             *(volatile u32 *)(s + ST_EDGES) += 1u;  /* visible to z5_main */
             *(volatile u32 *)(s + ST_REQ) += 1u;    /* the play request   */
+            /* Memory-only append through the copied bglog put image; the
+             * pointer is 0 until z5_bglog_init has run. */
+            Z5_BGLOG_PUT_HOOK(Z5_LOG_HOOK, Z5_BGLOG_NODE_SHUTTER, code,
+                              *(volatile u32 *)(s + ST_EDGES));
         }
     }
     if (orig < CODE_LO || orig >= CODE_HI) return 0u;

@@ -18,6 +18,18 @@ if '-o' in sys.argv:
     out = pathlib.Path(sys.argv[sys.argv.index('-o') + 1])
 
 out.parent.mkdir(parents=True, exist_ok=True)
+extra = []
+i = 0
+while i < len(sys.argv):
+    a = sys.argv[i]
+    if a == '--log' or a.startswith('--log='):
+        extra.append(a)
+    elif a == '--define' and i + 1 < len(sys.argv):
+        extra += [a, sys.argv[i + 1]]
+        i += 1
+    elif a.startswith('--define='):
+        extra.append(a)
+    i += 1
 subprocess.run([sys.executable, str(SDK / 'tools' / 'z5build.py'),
-                str(HERE / 'main.c'), '-o', str(out)], check=True)
+                str(HERE / 'main.c')] + extra + ['-o', str(out)], check=True)
 print('  copy %s to the card root' % out)
