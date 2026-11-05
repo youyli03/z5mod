@@ -60,16 +60,19 @@ def run(cmd) -> str:
     return r.stdout
 
 
-def flags_for(src: pathlib.Path) -> list:
+def flags_for(src: pathlib.Path, defs: list) -> list:
     """Sources named *_arm.c are compiled as ARM: a T-Kernel service must be
     entered from ARM state, so a task that calls one in a loop has to be ARM
-    code. Everything else stays Thumb."""
+    code. Everything else stays Thumb.  `defs` are the -D logging switches."""
+    flags = list(CFLAGS) + list(defs)
     if src.name.endswith('_arm.c'):
-        return [('-marm' if f == '-mthumb' else f) for f in CFLAGS]
-    return list(CFLAGS)
+        return [('-marm' if f == '-mthumb' else f) for f in flags]
+    return flags
 
 
-def build(main_c: pathlib.Path, out: pathlib.Path, keep: bool = False) -> None:
+def build(main_c: pathlib.Path, out: pathlib.Path, keep: bool = False,
+          defs: list | None = None) -> None:
+    defs = list(defs or [])
     main_c = main_c.resolve()
     stem = main_c.stem
     # Intermediates next to the output, not in a shared directory: two examples
@@ -81,11 +84,11 @@ def build(main_c: pathlib.Path, out: pathlib.Path, keep: bool = False) -> None:
     objs = []
     for src in sources:
         obj = work / (src.stem + '.o')
-        run([CC] + flags_for(src) + ['-c', str(src), '-o', str(obj)])
+        run([CC] + flags_for(src, defs) + ['-c', str(src), '-o', str(obj)])
         objs.append(obj)
 
     elf = work / (stem + '.elf')
-    run([CC] + CFLAGS + ['-T', str(LDScript), '-o', str(elf)] + objs
+    run([CC] + CFLAGS + defs + ['-T', str(LDScript), '-o', str(elf)] + objs
         + ['-Wl,--gc-sections', '-Wl,-Map=' + str(work / (stem + '.map'))])
 
     raw = work / (stem + '.bin')
@@ -118,13 +121,37 @@ def build(main_c: pathlib.Path, out: pathlib.Path, keep: bool = False) -> None:
     print('  output %s (%d bytes)' % (out, out.stat().st_size))
 
 
+def log_defines(value: str) -> list:
+    """--log => all areas; --log=UI,HOOK => master plus those switches."""
+    areas = ('BOOT', 'HB', 'UI', 'DRIVER', 'FLUSH', 'FS', 'HOOK',
+             'AUDIO', 'WAV', 'TASK', 'USER')
+    defs = ['-DZ5_LOG_ENABLE=1']
+    if value == 'all':
+        return defs + ['-DZ5_LOG_%s=1' % name for name in areas]
+    for name in value.split(','):
+        name = name.strip().upper()
+        if name not in areas:
+            raise SystemExit('unknown log area: %s' % name)
+        defs.append('-DZ5_LOG_%s=1' % name)
+    return defs
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description='build a .Z5M module from C sources')
     ap.add_argument('source', type=pathlib.Path, help='the example main.c')
     ap.add_argument('-o', '--out', type=pathlib.Path, required=True)
     ap.add_argument('--keep', action='store_true', help='keep the intermediate raw binary')
+    ap.add_argument('--log', nargs='?', const='all', default=None,
+                    help='enable bglog: all (default) or a comma list UI,HOOK,...')
+    ap.add_argument('--define', action='append', default=[], metavar='NAME=VALUE',
+                    help='extra preprocessor define for user log flags')
     args = ap.parse_args()
-    build(args.source, args.out, args.keep)
+    defs = []
+    if args.log is not None:
+        defs += log_defines(args.log)
+    for d in args.define:
+        defs.append('-D' + d)
+    build(args.source, args.out, args.keep, defs)
     return 0
 
 
